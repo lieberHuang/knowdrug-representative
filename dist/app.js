@@ -18,8 +18,6 @@ function migrateDrugCopy(value){
 let published=migrateDrugCopy(read('published',DEFAULT_PROFILE));
 if(published.script)published.script=published.script.replace('我会为您提供药品资料与学术支持。','我会为您提供日达仙资料与学术支持。');
 let draft=migrateDrugCopy(read('draft',null));
-const followed=read('followed',[]);
-let notes=migrateDrugCopy(read('notes',{}));
 let period=[7,30].includes(read('period',7))?read('period',7):7;
 let page='home',params={},doctorSearch='',currentMetric='qa',previewSpeaking=false;
 const names={home:'首页',avatar:'我的数字人',insights:'医生洞察',stats:'使用统计',doctor:'医生提问总结',studio:'录入数字人',preview:'视频预览',scripts:'录制话术',shareLinks:'邀请链接',knowledge:'知识库问答'};
@@ -35,80 +33,16 @@ function typeCount(events,type){return events.filter(e=>e.type===type).length;}
 function countDoctors(events){return new Set(events.map(e=>e.doctor)).size;}
 function topTopics(events){const counts={};events.filter(e=>e.type==='qa').forEach(e=>counts[e.question.topic]=(counts[e.question.topic]||0)+1);return Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'zh-CN'));}
 function summary(events){const topics=topTopics(events);const count=typeCount(events,'qa');return count?`本期共提出 ${count} 个问题，主要关注${topics.slice(0,2).map(t=>`“${t[0]}”`).join('与')}。`:'本期暂无提问记录。';}
-function followState(id){
- const change=(notes[id]||[]).find(record=>record.kind==='status');
- return change||{status:followed.includes(id)?'done':'pending'};
-}
-function followLabel(status){return status==='done'?'已跟进':'待跟进';}
-function recordFollow(doctorId, record){
- const next={...notes,[doctorId]:[{...record,at:new Date().toISOString()},...(notes[doctorId]||[])]};
- if(!save('notes',next)){toast('存储空间不足，跟进记录未保存');return false;}
- notes=next;
- return true;
-}
-function followStatusMarkup(id){
- const current=followState(id);
- return `<span class="tag ${current.status==='done'?'done':'pending'}">${followLabel(current.status)}</span>
-  <small>${current.at?'变更于 '+formatDate(current.at):'暂无状态变更记录'}</small>`;
-}
-function followTimeline(records, showDoctor=false){
- if(!records.length)return '<p class="follow-empty">暂无跟进记录</p>';
- return `<ol class="follow-timeline">${records.map(record=>{
-  const doctor=showDoctor?DOCTORS.find(d=>d.id===record.doctorId):null;
-  const label=record.label||(record.kind==='status'?'标记为'+followLabel(record.status):'跟进记录');
-  return `<li><div class="follow-event-heading"><strong>${esc(label)}</strong><time datetime="${esc(record.at)}">${formatDate(record.at)}</time></div>
-   ${doctor?`<button class="text-btn follow-link" data-doctor="${doctor.id}">${esc(doctor.name)} ›</button>`:''}
-   ${record.text?`<p>${record.kind==='note'?'<b>笔记</b> ':''}${esc(record.text)}</p>`:''}
-   ${record.detail?`<p><b>详细跟进</b> ${esc(record.detail)}</p>`:''}
-  </li>`;
- }).join('')}</ol>`;
-}
-function byNewest(records){return records.sort((a,b)=>Date.parse(b.at)-Date.parse(a.at));}
-function personalHistory(id){
- return followTimeline(byNewest([...(notes[id]||[])]));
-}
-function followPanel(doctor){
- const id=doctor.id;
- return `<section class="panel follow-panel" data-follow-id="${id}">
-  <div class="follow-status"><span id="follow-status-info">${followStatusMarkup(id)}</span>
-   <button class="secondary-button" id="toggle-follow" data-id="${id}">${followState(id).status==='done'?'改为待跟进':'标记已跟进'}</button></div>
-  <form id="follow-form">
-   <label for="follow-note">跟进笔记</label>
-   <textarea class="note-area" id="follow-note" name="note" rows="2" maxlength="500" placeholder="记录需要准备的资料与沟通重点"></textarea>
-   <label for="follow-detail">详细跟进记录</label>
-   <textarea class="note-area" id="follow-detail" name="detail" rows="4" maxlength="1500" placeholder="记录沟通结果、待办事项与下次联系计划"></textarea>
-   <button class="primary-button full" type="submit">保存跟进记录</button>
-  </form>
-  <div id="follow-history">${personalHistory(id)}</div>
- </section>`;
-}
-function updateFollowPanel(id){
- const status=$('#follow-status-info'), toggle=$('#toggle-follow'), history=$('#follow-history');
- if(status)status.innerHTML=followStatusMarkup(id);
- if(toggle)toggle.textContent=followState(id).status==='done'?'改为待跟进':'标记已跟进';
- if(history)history.innerHTML=personalHistory(id);
-}
-document.addEventListener('submit',event=>{
- if(event.target.id!=='follow-form')return;
- event.preventDefault();
- const id=params.id;
- const form=event.target;
- const data=new FormData(form);
- const text=String(data.get('note')).trim(), detail=String(data.get('detail')).trim();
- if(!text&&!detail){toast('请填写笔记或详细跟进记录');return;}
- if(!recordFollow(id,{kind:'note',text,detail}))return;
- form.reset();updateFollowPanel(id);toast('跟进记录已保存');
-});
 function periodControl(){return `<div class="period-switch" role="group" aria-label="统计周期"><button data-period="7" class="${period===7?'active':''}" aria-pressed="${period===7}">近7天</button><button data-period="30" class="${period===30?'active':''}" aria-pressed="${period===30}">近30天</button></div>`;}
 function metricPanel(events){return `<div class="metrics-panel"><button class="metric" data-page="insights"><div class="metric-label">${icon('person')}活跃医生</div><div class="metric-value">${countDoctors(events)}<span>位</span></div></button><button class="metric" data-feature="qa"><div class="metric-label">${icon('chat')}日达仙问答</div><div class="metric-value">${typeCount(events,'qa')}<span>次</span></div></button><button class="metric" data-feature="guides"><div class="metric-label">${icon('book')}相关指南</div><div class="metric-value">${typeCount(events,'guides')}<span>次</span></div></button><button class="metric" data-feature="video"><div class="metric-label">${icon('play')}数字人观看</div><div class="metric-value">${typeCount(events,'video')}<span>次</span></div></button></div>`;}
 function moduleRows(events,onlyClinical=false){const items=onlyClinical?MODULES.filter(m=>m.id!=='qa'):MODULES;const max=Math.max(1,...items.map(m=>typeCount(events,m.id)));return items.map(m=>{const total=typeCount(events,m.id);const doctors=countDoctors(events.filter(e=>e.type===m.id));return `<button class="module-row" data-feature="${m.id}"><span class="module-icon">${icon(m.icon)}</span><div><h3>${m.name}</h3><div class="module-bar"><i style="width:${total/max*100}%"></i></div></div><strong>${total}</strong><span class="chevron">›</span></button>`;}).join('');}
 function photo(profile,cls='',alt='数字人形象'){return `<img class="${cls}" src="${esc(profile.photo)}" alt="${esc(alt)}">`;}
 function home(){const events=eventsFor();const topics=topTopics(events);const hour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',hour:'numeric',hour12:false}).format(new Date()));const greeting=hour<11?'上午好':hour<14?'中午好':hour<18?'下午好':'晚上好';return `<div class="greeting"><h1>${published.name?esc(published.name)+'，'+greeting:'欢迎使用知药'}</h1><span class="rep-label">代表版</span></div><section class="portrait-card"><img class="portrait" src="${esc(published.photo)}" alt="${esc(published.name)}的数字人"><button class="round-play" data-preview="published" aria-label="预览数字人">${icon('play')}</button><div class="portrait-info"><span class="status-badge"><i></i>数字人形象</span><h2>我的数字人</h2><button class="text-btn" data-page="avatar">管理形象 <span>›</span></button></div></section><div class="section-head"><h2>日达仙概览</h2>${periodControl()}</div>${metricPanel(events)}<div class="section-head"><h2>医生关注重点</h2><button class="text-btn" data-page="insights">全部洞察 ›</button></div><section class="panel"><div class="insight-note">${icon('spark')}<div>近期高频问题集中在<strong>${esc(topics[0]?.[0]||'药品资料')}</strong>与<strong>${esc(topics[1]?.[0]||'临床证据')}</strong>。</div></div>${topics.slice(0,3).map(([topic,count],i)=>`<button class="topic-row" data-page="insights"><span class="topic-rank">${String(i+1).padStart(2,'0')}</span><span class="topic-title">${topic}</span><span class="topic-progress"><i style="width:${count/(topics[0]?.[1]||1)*100}%"></i></span><span class="topic-count">${count}次</span><span class="chevron">›</span></button>`).join('')}</section>`;}
-function doctorCard(doctor){const all=eventsFor(doctor.id);const qs=all.filter(e=>e.type==='qa');const topics=topTopics(qs);const status=followState(doctor.id).status;return `<button class="doctor-card" data-doctor="${doctor.id}"><div class="doctor-card-top"><span class="doctor-avatar">${esc(doctor.name[0])}</span><div><h3>${esc(doctor.name)}</h3><div class="doctor-meta">${esc(doctor.hospital)} · ${esc(doctor.department)}</div></div><span class="chevron">›</span></div><p class="doctor-summary">${summary(all)}</p><div class="tag-row">${topics.slice(0,2).map(([t])=>`<span class="tag">${t}</span>`).join('')}${RepWorkspace.tags(doctor.id)}${`<span class="tag ${status==='done'?'done':'pending'}">${followLabel(status)}</span>`}<span class="qa-count">${qs.length}次提问</span></div></button>`;}
+function doctorCard(doctor){const all=eventsFor(doctor.id);const qs=all.filter(e=>e.type==='qa');const topics=topTopics(qs);return `<button class="doctor-card" data-doctor="${doctor.id}"><div class="doctor-card-top"><span class="doctor-avatar">${esc(doctor.name[0])}</span><div><h3>${esc(doctor.name)}</h3><div class="doctor-meta">${esc(doctor.hospital)} · ${esc(doctor.department)}</div></div><span class="chevron">›</span></div><p class="doctor-summary">${summary(all)}</p><div class="tag-row">${topics.slice(0,2).map(([t])=>`<span class="tag">${t}</span>`).join('')}${RepWorkspace.tags(doctor.id)}<span class="qa-count">${qs.length}次提问</span></div></button>`;}
 function filteredDoctors(){return DOCTORS.filter(d=>`${d.name}${d.department}${d.hospital}`.includes(doctorSearch)).sort((a,b)=>eventsFor(b.id,'qa').length-eventsFor(a.id,'qa').length);}
 function insights(){return `<div class="page-toolbar"><h2>医生洞察</h2>${periodControl()}</div><label class="search-field">${icon('search')}<input id="doctor-search" type="search" placeholder="搜索医生、医院或科室" value="${esc(doctorSearch)}" aria-label="搜索医生"></label><div id="doctor-list">${doctorList()}</div>`;}
 function doctorList(){const list=filteredDoctors();return list.length?list.map(doctorCard).join(''):`<div class="empty">${icon('search')}暂无匹配的医生</div>`;}
-function doctorDetail(){const doctor=DOCTORS.find(d=>d.id===params.id)||DOCTORS[0];const events=eventsFor(doctor.id);const topics=topTopics(events);const questions=events.filter(e=>e.type==='qa');const uniqueQuestions=questions.filter((event,index,list)=>list.findIndex(other=>other.question.text===event.question.text)===index).slice(0,6);return `<div class="doctor-header"><span class="doctor-avatar">${esc(doctor.name[0])}</span><div><h2>${esc(doctor.name)}</h2><p>${esc(doctor.hospital)} · ${esc(doctor.department)}</p></div></div>${RepWorkspace.doctorPanel(doctor.id)}<div class="page-toolbar"><span class="status-badge">${questions.length}次提问</span>${periodControl()}</div><section class="panel"><h3 class="summary-title">${icon('spark')}提问总结</h3><p class="summary-copy">${summary(events)}</p><div class="summary-action">建议准备${TOPIC_MATERIALS[topics[0]?.[0]]||'相关药品资料'}，用于下一次学术沟通。</div><div class="tag-row">${topics.map(([topic,count])=>`<span class="tag">${topic} ${count}</span>`).join('')}</div></section><div class="section-head"><h2>近期问题</h2></div><section class="panel">${uniqueQuestions.map(e=>`<article class="question-entry"><p>${esc(e.question.text)}</p><div class="entry-meta"><time>${formatDate(e.at)}</time><span class="tag">${e.question.topic}</span></div></article>`).join('')}</section><div class="section-head"><h2>功能使用</h2></div><section class="panel">${moduleRows(events)}</section><div class="section-head"><h2>跟进记录</h2></div>${followPanel(doctor)}`;}
+function doctorDetail(){const doctor=DOCTORS.find(d=>d.id===params.id)||DOCTORS[0];const events=eventsFor(doctor.id);const topics=topTopics(events);const questions=events.filter(e=>e.type==='qa');const uniqueQuestions=questions.filter((event,index,list)=>list.findIndex(other=>other.question.text===event.question.text)===index).slice(0,6);return `<div class="doctor-header"><span class="doctor-avatar">${esc(doctor.name[0])}</span><div><h2>${esc(doctor.name)}</h2><p>${esc(doctor.hospital)} · ${esc(doctor.department)}</p></div></div>${RepWorkspace.doctorPanel(doctor.id)}<div class="page-toolbar"><span class="status-badge">${questions.length}次提问</span>${periodControl()}</div><section class="panel"><h3 class="summary-title">${icon('spark')}提问总结</h3><p class="summary-copy">${summary(events)}</p><div class="summary-action">建议准备${TOPIC_MATERIALS[topics[0]?.[0]]||'相关药品资料'}，用于下一次学术沟通。</div><div class="tag-row">${topics.map(([topic,count])=>`<span class="tag">${topic} ${count}</span>`).join('')}</div></section><div class="section-head"><h2>近期问题</h2></div><section class="panel">${uniqueQuestions.map(e=>`<article class="question-entry"><p>${esc(e.question.text)}</p><div class="entry-meta"><time>${formatDate(e.at)}</time><span class="tag">${e.question.topic}</span></div></article>`).join('')}</section>`;}
 function chartData(events,type){const count=(older,newer)=>events.filter(e=>e.type===type&&e.day<=older&&e.day>=newer).length;return period===7?Array.from({length:7},(_,i)=>({label:dayLabel(6-i),full:dayLabel(6-i),count:count(6-i,6-i)})):Array.from({length:6},(_,i)=>{const older=29-i*5;return {label:dayLabel(older),full:dayLabel(older)+'–'+dayLabel(older-4),count:count(older,older-4)};});}
 function chartHTML(events,type,id='trend'){const points=chartData(events,type);const max=Math.max(1,...points.map(p=>p.count));const last=points[points.length-1];return `<div class="chart-value" id="${id}-value">${last.full} · ${last.count}次</div><div class="chart" aria-label="功能使用趋势">${points.map((p,i)=>`<button class="chart-column ${i===points.length-1?'selected':''}" style="--bar:${Math.max(2,p.count/max*100)}%" data-chart="${id}" data-chart-label="${p.full} · ${p.count}次" aria-label="${p.full} ${p.count}次"><span class="bar-track"><i></i></span><small>${p.label}</small></button>`).join('')}</div>`;}
 function stats(){const events=eventsFor();return `<div class="page-toolbar"><h2>数据总览</h2><button class="text-btn" id="export-stats">${icon('download')}导出</button></div><div class="page-toolbar"><span class="status-badge">${period===7?'近7天':'近30天'}</span>${periodControl()}</div>${metricPanel(events)}<div class="section-head"><h2>使用趋势</h2></div><section class="panel"><div class="stat-heading"><h3>${[...MODULES,{id:'video',name:'数字人观看'}].find(m=>m.id===currentMetric).name}</h3><select id="trend-metric" aria-label="选择趋势指标">${[...MODULES,{id:'video',name:'数字人观看'}].map(m=>`<option value="${m.id}" ${m.id===currentMetric?'selected':''}>${m.name}</option>`).join('')}</select></div>${chartHTML(events,currentMetric)}</section><div class="section-head"><h2>功能明细</h2></div><section class="panel">${moduleRows(events)}<button class="module-row" data-feature="video"><span class="module-icon">${icon('play')}</span><div><h3>数字人观看</h3><div class="module-bar"><i style="width:100%"></i></div></div><strong>${typeCount(events,'video')}</strong><span class="chevron">›</span></button></section>`;}
@@ -125,7 +59,7 @@ $('#sheet').addEventListener('close',()=>{if(history.state?.sheet)history.back()
 $('#sheet').addEventListener('click',e=>{if(e.target===$('#sheet')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 let touchStart=null;$('#sheet').addEventListener('touchstart',e=>{touchStart=$('#sheet').scrollTop<=0?e.touches[0].clientY:null;},{passive:true});$('#sheet').addEventListener('touchend',e=>{if(touchStart!==null&&e.changedTouches[0].clientY-touchStart>90)$('#sheet').close();touchStart=null;},{passive:true});
 $('#profile').onclick=()=>openSheet('我的',RepWorkspace.myMarkup());
-function resetRepresentative(){const keys=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key?.startsWith(STORE))keys.push(key);}keys.forEach(key=>localStorage.removeItem(key));published={...DEFAULT_PROFILE};draft=null;followed.splice(0);notes={};period=7;doctorSearch='';currentMetric='qa';ORIGINAL_DOCTORS.forEach((original,index)=>Object.assign(DOCTORS[index],original));$('#profile img').src=published.photo;$('#profile img').alt='我的';}
+function resetRepresentative(){const keys=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key?.startsWith(STORE))keys.push(key);}keys.forEach(key=>localStorage.removeItem(key));published={...DEFAULT_PROFILE};draft=null;period=7;doctorSearch='';currentMetric='qa';ORIGINAL_DOCTORS.forEach((original,index)=>Object.assign(DOCTORS[index],original));$('#profile img').src=published.photo;$('#profile img').alt='我的';}
 
 function featureDetail(type){const module=MODULES.find(m=>m.id===type)||{id:'video',name:'数字人观看'};const all=eventsFor(page==='doctor'?params.id:null,type);const ranked=DOCTORS.map(d=>({doctor:d,count:all.filter(e=>e.doctor===d.id).length})).filter(r=>r.count).sort((a,b)=>b.count-a.count);openSheet(module.name,`<div class="feature-detail-metrics"><div><div class="detail-number">${all.length}</div><div class="detail-label">使用次数</div></div><div><div class="detail-number">${countDoctors(all)}</div><div class="detail-label">使用医生</div></div></div>${chartHTML(all,type,'feature')}<h3>医生使用排行</h3>${ranked.map(({doctor,count})=>`<div class="rank-row"><span class="doctor-avatar">${esc(doctor.name[0])}</span><span>${esc(doctor.name)}</span><strong>${count}次</strong></div>`).join('')}`);}
 function stopSpeech(){if(window.speechSynthesis)window.speechSynthesis.cancel();previewSpeaking=false;const button=$('#preview-play');if(button)button.innerHTML=`${icon('play')}播放介绍`;}
@@ -141,14 +75,6 @@ document.addEventListener('click',event=>{
  switch(target.id){
   case 'create-avatar':navigate('studio');break;
   case 'edit-avatar':navigate('studio');break;
-  case 'toggle-follow':{
-   const id=target.dataset.id;
-   const status=followState(id).status==='done'?'pending':'done';
-   if(recordFollow(id,{kind:'status',status})){
-    updateFollowPanel(id);toast('已标记为'+followLabel(status));
-   }
-   break;
-  }
   case 'export-stats':exportStats();break;
  }
 });
@@ -162,6 +88,6 @@ document.addEventListener('change',event=>{
 
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSpeech();});
-if(read('drug-copy-version',0)<1){save('published',published);save('draft',draft);save('notes',notes);save('drug-copy-version',1);}
+if(read('drug-copy-version',0)<1){save('published',published);save('draft',draft);save('drug-copy-version',1);}
 RepWorkspace.init({profile:()=>published,doctors:DOCTORS,go:(target,replace=false)=>navigate(target,{},false,replace),refresh:()=>renderKeepScroll(),reset:resetRepresentative,toast,modal:openSheet,closeThen:action=>{if($('#sheet').open){afterSheetClose=action;$('#sheet').close();}else action();},updateProfile:p=>{published={...published,name:p.name,photo:p.photo};$('#profile img').src=p.photo;$('#profile img').alt=p.name;}});
 render();
