@@ -9,7 +9,7 @@ function click(w,selector){const el=w.document.querySelector(selector);assert.ok
 function input(w,id,value){const el=w.document.getElementById(id);assert.ok(el,id);el.value=value;el.dispatchEvent(new w.Event('input',{bubbles:true}));}
 function change(w,selector,value){const el=w.document.querySelector(selector);el.value=value;el.dispatchEvent(new w.Event('change',{bubbles:true}));}
 (async()=>{
- const p=page(),{w,api}=p;await wait();assert.match(w.document.body.textContent,/日达仙概览/);assert.equal(w.document.querySelectorAll('.bottom-nav button').length,4);assert.equal(w.Meetings,undefined);assert.doesNotMatch(w.document.body.textContent,/会议|待跟进医生/);
+ const p=page(),{w,api}=p;await wait();assert.match(w.document.body.textContent,/日达仙概览/);assert.equal(w.document.querySelectorAll('.bottom-nav button').length,4);assert.equal(w.Meetings,undefined);assert.doesNotMatch(w.document.body.textContent,/会议|待跟进医生|病历点评|最新文献/);assert.equal(w.eval("EVENTS.some(event=>['case','papers'].includes(event.type))"),false);assert.equal(w.eval("MODULES.some(item=>['case','papers'].includes(item.id))"),false);
  for(const route of ['avatar','studio','scripts','knowledge','insights','doctor','stats','home']){w.eval(`navigate('${route}',{id:'d1'})`);await wait();assert.ok(w.document.getElementById('main').textContent.trim(),route);}
  // The photo and voice stages are separate; verification has a blocking loading dialog.
  w.eval("navigate('studio')");assert.equal(w.document.getElementById('rw-role'),null);assert.equal(w.document.getElementById('rw-face'),null);assert.equal(w.document.getElementById('rw-voice'),null);input(w,'rw-name','林新');click(w,'[data-rw="photo-next"]');assert.equal(w.document.getElementById('rw-voice'),null);
