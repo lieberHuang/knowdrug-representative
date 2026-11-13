@@ -20,10 +20,6 @@ const QUESTION_BANK = [
   "text": "如何查阅日达仙相关的指南与循证资料？"
  },
  {
-  "topic": "病历点评",
-  "text": "日达仙相关病例的病史和用药记录还需要补充什么？"
- },
- {
   "topic": "用药安全",
   "text": "如何查找日达仙说明书中的注意事项与不良反应？"
  },
@@ -46,14 +42,10 @@ const QUESTION_BANK = [
  {
   "topic": "用药安全",
   "text": "如何建立日达仙合并用药核对清单？"
- },
- {
-  "topic": "病历点评",
-  "text": "日达仙相关病例的病历点评支持哪些维度？"
  }
 ];
-const TOPIC_MATERIALS={'用法用量':'说明书用法用量及资料核对清单','用药安全':'药物相互作用与注意事项资料','特殊人群':'特殊人群用药资料','指南证据':'指南阅读要点与原始出处','病历点评':'病历信息完整性核对清单','临床研究':'研究设计与终点解读资料'};
-const MODULES=[{id:'qa',name:'日达仙问答',icon:'chat'},{id:'case',name:'病历点评',icon:'case'},{id:'guides',name:'相关指南',icon:'book'},{id:'papers',name:'最新文献',icon:'paper'}];
+const TOPIC_MATERIALS={'用法用量':'说明书用法用量及资料核对清单','用药安全':'药物相互作用与注意事项资料','特殊人群':'特殊人群用药资料','指南证据':'指南阅读要点与原始出处','临床研究':'研究设计与终点解读资料'};
+const MODULES=[{id:'qa',name:'日达仙问答',icon:'chat'},{id:'guides',name:'相关指南',icon:'book'}];
 const DATE_KEY = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const DATE_ANCHOR = new Date(DATE_KEY+'T12:00:00+08:00');
 const EVENTS=[];
@@ -65,9 +57,7 @@ for(let day=0;day<30;day++){
   add('video');
   const questionCount=1+(day+i)%3+(day%4===0?1:0);
   for(let n=0;n<questionCount;n++)add('qa',n,QUESTION_BANK[(day*2+i+n*3)%QUESTION_BANK.length]);
-  if((i+day)%3===0)add('case');
   if((i+day)%2===0)add('guides');
-  if((i+day)%3!==0)add('papers');
  });
 }
 EVENTS.sort((a,b)=>b.at.localeCompare(a.at));
