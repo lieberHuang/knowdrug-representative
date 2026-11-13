@@ -3,3 +3,29 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .period-switch button,.chip,.portrait-info .text-btn,.draft-notice button,.photo-actions .secondary-button,.photo-actions .text-btn,.choice{min-height:44px}.stat-heading select{min-height:44px}
+
+/* Doctor follow-up history */
+.follow-status { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px; }
+.follow-status small { display: block; margin-top: 5px; color: #54706a; }
+.tag.done { color: #246654; background: #def2e8; }
+.follow-panel form label { display: block; margin: 12px 0 6px; font-weight: 600; }
+.follow-panel form textarea { width: 100%; box-sizing: border-box; }
+.follow-panel form > button { margin-top: 14px; }
+.follow-timeline { list-style: none; padding: 0 0 0 13px; margin: 16px 0 0; }
+.follow-timeline li {
+  position: relative; padding: 0 0 16px 14px; border-left: 1px solid #c6dfd4; overflow-wrap: anywhere;
+}
+.follow-timeline li::before {
+  content: ""; width: 8px; height: 8px; position: absolute; left: -4.5px; top: 6px;
+  border-radius: 50%; background: var(--green);
+}
+.follow-timeline li:last-child { padding-bottom: 0; border-left-color: transparent; }
+.follow-event-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.follow-event-heading time, .follow-empty { color: #54706a; font-size: 13px; }
+.follow-event-heading time { flex-shrink: 0; }
+.follow-timeline p { margin: 5px 0; white-space: pre-wrap; line-height: 1.6; }
+.follow-link { text-align: left; height: auto; min-height: 36px; padding: 4px 0; }
+
+.insight-segments{display:flex;background:var(--mint);padding:4px;border-radius:12px;gap:4px;margin-bottom:15px}
+.insight-segments button{flex:1;min-height:44px;border-radius:9px;font-size:14px;color:var(--muted)}
+.insight-segments button.active{background:#fff;color:var(--green);font-weight:600;box-shadow:0 1px 5px #17332c08}

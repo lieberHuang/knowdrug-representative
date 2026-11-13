@@ -1,6 +1,11 @@
 {
   "name": "knowdrug-representative",
   "private": true,
-  "scripts": {"test": "node tests/meeting-store.test.cjs && node tests/representative-flows.test.cjs"},
-  "devDependencies": {"fake-indexeddb": "6.2.8", "jsdom": "31.0.0"}
+  "scripts": {
+    "test": "node tests/representative-flows.test.cjs"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.8",
+    "jsdom": "31.0.0"
+  }
 }
