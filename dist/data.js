@@ -48,6 +48,15 @@ const TOPIC_MATERIALS={'用法用量':'说明书用法用量及资料核对清�
 const MODULES=[{id:'qa',name:'日达仙问答',icon:'chat'},{id:'guides',name:'相关指南',icon:'book'}];
 const DATE_KEY = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const DATE_ANCHOR = new Date(DATE_KEY+'T12:00:00+08:00');
+// Browser-local product fixtures: applications are scoped to one doctor and use anonymous patient IDs.
+const PAYMENT_APPLICATIONS=DOCTORS.flatMap((doctor,index)=>{
+ const statuses=['active','reviewing','needs_info','active','closed','active'];
+ return Array.from({length:[5,4,6,3][index%4]},(_,i)=>{
+  const ago=15+i*3+index%5,createdAt=new Date(DATE_ANCHOR.getTime()-ago*86400000).toISOString();
+  const status=statuses[(i+index)%statuses.length];
+  return {id:`PAY-${doctor.id.toUpperCase()}-${String(i+1).padStart(3,'0')}`,doctorId:doctor.id,patientId:`P${String(index*10+i+1).padStart(4,'0')}`,service:'日达仙创新支付服务',status,createdAt,updatedAt:new Date(Date.parse(createdAt)+(status==='active'?3:2)*86400000).toISOString(),progress:{active:'申请审核已通过，服务已开通。',reviewing:'申请材料核验完成，正在进行服务审核。',needs_info:'需要补充保障信息及相关材料，待患者完善后继续审核。',closed:'申请审核未通过，可查看审核结果并补充相关说明。'}[status]};
+ });
+});
 const EVENTS=[];
 for(let day=0;day<30;day++){
  const dateKey=new Date(DATE_ANCHOR.getTime()-day*86400000).toISOString().slice(0,10);
