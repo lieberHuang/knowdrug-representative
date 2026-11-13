@@ -6,15 +6,15 @@ const RepLocal=(()=>{
  const get=id=>run('readonly',s=>s.get(id));
  const put=record=>run('readwrite',s=>s.put(record));
  const remove=id=>run('readwrite',s=>s.delete(id));
+ const clear=()=>run('readwrite',s=>s.clear());
  const all=async prefix=>(await run('readonly',s=>s.getAll())).filter(r=>r.id.startsWith(prefix));
  const uid=prefix=>prefix+crypto.randomUUID();
  const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- async function track(link,type,extra={}){await put({id:uid('event:'),linkId:link.id,repId:link.repId,doctorId:link.doctorId,type,at:new Date().toISOString(),...extra});}
- return {get,put,remove,all,uid,escape,track};
+ async function track(link,type,extra={}){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite'),store=tx.objectStore('records');let missing=false;store.get(link.id).onsuccess=ev=>{if(!ev.target.result){missing=true;return;}store.put({id:uid('event:'),linkId:link.id,repId:link.repId,doctorId:link.doctorId,type,at:new Date().toISOString(),...extra});};tx.oncomplete=()=>missing?reject(new Error('链接已失效，请联系代表重新生成')):resolve();tx.onerror=tx.onabort=()=>reject(new Error('记录未保存，请重试'));});}
+ return {get,put,remove,clear,all,uid,escape,track};
 })();
 const RepKnowledge=(()=>{
- function parse(text,name){let value=text.replace(/^\uFEFF/,'');if(/\.json$/i.test(name)){const data=JSON.parse(value);const walk=x=>typeof x==='string'?x:Array.isArray(x)?x.map(walk).join('\n'):x&&typeof x==='object'?Object.entries(x).map(([k,v])=>k+'：'+walk(v)).join('\n'):String(x??'');value=walk(data);}value=value.replace(/\u0000/g,'').trim();if(value.length<20)throw new Error('资料内容至少需要 20 个字');if(value.length>350000)throw new Error('单份资料文字过多，请拆分后导入');return value;}
  function terms(query){const clean=query.toLowerCase().replace(/日达仙|请问|如何|什么|这个|是否|相关|可以|需要|了解|一下/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ');const out=new Set();for(const word of clean.trim().split(/\s+/)){if(!word)continue;if(/^[a-z0-9]+$/.test(word)){out.add(word);continue;}if(word.length<2)continue;for(let i=0;i<word.length-1;i++)out.add(word.slice(i,i+2));}return [...out];}
  function search(documents,query){const keys=terms(query);if(!keys.length)return [];const results=[];for(const doc of documents){const paragraphs=doc.text.split(/\n\s*\n|\n(?=[#第])/).flatMap(p=>{const a=[];for(let i=0;i<p.length;i+=450)a.push(p.slice(i,i+550));return a;}).filter(p=>p.trim());paragraphs.forEach((text,index)=>{const low=text.toLowerCase();const matches=keys.filter(k=>low.includes(k));if(!matches.length)return;const score=matches.length/keys.length+matches.length*.12;if(keys.length>3&&matches.length/keys.length<.2)return;results.push({docId:doc.id,name:doc.name,section:index+1,text:text.trim(),score});});}return results.sort((a,b)=>b.score-a.score).slice(0,4);}
- return {parse,terms,search};
+ return {terms,search};
 })();
