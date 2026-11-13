@@ -2,7 +2,7 @@
   "name": "knowdrug-representative",
   "private": true,
   "scripts": {
-    "test": "node tests/representative-flows.test.cjs"
+    "test": "node tests/mobile-compat.test.cjs && node tests/representative-flows.test.cjs && node tests/representative-flows.test.cjs --legacy-dialogs"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.8",

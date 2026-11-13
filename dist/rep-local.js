@@ -8,7 +8,7 @@ const RepLocal=(()=>{
  const remove=id=>run('readwrite',s=>s.delete(id));
  const clear=()=>run('readwrite',s=>s.clear());
  const all=async prefix=>(await run('readonly',s=>s.getAll())).filter(r=>r.id.startsWith(prefix));
- const uid=prefix=>prefix+crypto.randomUUID();
+ const uid=prefix=>prefix+MobileCompat.uuid();
  const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  async function track(link,type,extra={}){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction('records','readwrite'),store=tx.objectStore('records');let missing=false;store.get(link.id).onsuccess=ev=>{if(!ev.target.result){missing=true;return;}store.put({id:uid('event:'),linkId:link.id,repId:link.repId,doctorId:link.doctorId,type,at:new Date().toISOString(),...extra});};tx.oncomplete=()=>missing?reject(new Error('链接已失效，请联系代表重新生成')):resolve();tx.onerror=tx.onabort=()=>reject(new Error('记录未保存，请重试'));});}
  return {get,put,remove,clear,all,uid,escape,track};
