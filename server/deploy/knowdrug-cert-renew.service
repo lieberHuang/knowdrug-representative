@@ -1,0 +1,8 @@
+[Unit]
+Description=Renew knowdrug IP HTTPS certificate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/knowdrug-certbot/bin/certbot renew --quiet --deploy-hook /bin/systemctl reload nginx
