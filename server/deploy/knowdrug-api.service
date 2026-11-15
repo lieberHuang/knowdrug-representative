@@ -1,0 +1,22 @@
+[Unit]
+Description=knowdrug DeepSeek API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=knowdrug
+Group=knowdrug
+WorkingDirectory=/opt/knowdrug-api
+EnvironmentFile=/etc/knowdrug-api.env
+ExecStart=/usr/bin/node /opt/knowdrug-api/server/aliyun.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=70
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

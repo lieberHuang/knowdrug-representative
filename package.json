@@ -2,7 +2,7 @@
   "name": "knowdrug-representative",
   "private": true,
   "scripts": {
-    "test": "node tests/knowledge-api.test.cjs && node tests/mobile-compat.test.cjs && node tests/representative-flows.test.cjs && node tests/representative-flows.test.cjs --legacy-dialogs"
+    "test": "node tests/knowledge-api.test.cjs && node tests/aliyun-api.test.cjs && node tests/mobile-compat.test.cjs && node tests/representative-flows.test.cjs && node tests/representative-flows.test.cjs --legacy-dialogs"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.8",
