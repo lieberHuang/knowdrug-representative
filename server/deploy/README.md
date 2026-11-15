@@ -6,6 +6,8 @@
 
 建议部署目录 `/opt/knowdrug-api`，服务环境文件 `/etc/knowdrug-api.env`。真实密钥只保存在服务器权限为 `0600` 的环境文件中；`env.example` 不包含密钥。监听本机 `127.0.0.1:3001`，通过已有 Nginx 的独立 HTTPS 虚拟主机或路径转发。`TRUST_PROXY=1` 仅接受回环代理提供的真实客户端 IP，忽略外部传入的 CF IP 头。
 
+没有域名时，也可在确认 ECS 公网 IP 与 80/443 端口可用后申请 Let's Encrypt 的 IP 地址证书。Certbot 5.4 及以上版本支持 `--preferred-profile shortlived --webroot --ip-address <公网 IP>`；IP 证书有效期约 6 天，必须配置自动续期以及续期后重新加载 Nginx。先用 `--staging` 验证，再申请正式证书。`nginx.conf.example` 仅是域名场景的占位模板，IP 场景需按服务器现有站点配置调整。参考：https://letsencrypt.org/2026/03/11/shorter-certs-certbot/
+
 检查顺序：本机 health → 服务器本机 health → 域名 HTTPS → GitHub 来源 CORS → 三专家真实回答及三个追问 → 药品专家越界拒答。全部通过后才更新代表端 API 地址。
 
 Workbench CLI 已安装在本机 `~/.local/bin/workbench`。如未配置阿里云 CLI，使用 `workbench config --mode AK` 配置 Workbench 自身凭证。账号凭证直接在终端输入，不放进本仓库。准备包不会包含任何凭证。
