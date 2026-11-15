@@ -1,7 +1,7 @@
 // Synthetic, deterministic fixtures. No doctor-side data is collected by this project.
 const DOCTORS = [
  ['d1','张明远','心血管内科','仁和医院'],['d2','李文静','内分泌科','江城中心医院'],['d3','王志诚','心血管内科','滨江医院'],['d4','陈思源','全科医学科','仁和医院'],['d5','刘嘉宁','心血管内科','江城中心医院'],['d6','赵文博','内分泌科','滨江医院'],['d7','周亦辰','全科医学科','仁和医院'],['d8','吴晓岚','心血管内科','滨江医院'],['d9','郑宇航','内分泌科','江城中心医院'],['d10','孙思涵','全科医学科','仁和医院'],['d11','许景然','心血管内科','滨江医院'],['d12','林雨桐','内分泌科','江城中心医院']
-].map(([id,name,department,hospital])=>({id,name,department,hospital}));
+].map(([id,name,department,hospital],index)=>({id,name,department,hospital,title:['主任医师','副主任医师','主治医师','副主任医师'][index%4]}));
 const QUESTION_BANK = [
  {
   "topic": "用法用量",
