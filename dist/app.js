@@ -20,7 +20,7 @@ if(published.script)published.script=published.script.replace('我会为您提�
 let draft=migrateDrugCopy(read('draft',null));
 let period=[7,30].includes(read('period',7))?read('period',7):7;
 let page='home',params={},doctorSearch='',currentMetric='qa',previewSpeaking=false;
-const names={home:'首页',avatar:'我的数字人',insights:'医生洞察',stats:'使用统计',doctor:'医生提问总结',studio:'录入数字人',modelComplete:'建模完成',preview:'视频预览',scripts:'录制话术',shareLinks:'邀请链接',knowledge:'知识库问答'};
+const names={home:'首页',avatar:'我的数字人',insights:'医生洞察',stats:'使用统计',doctor:'医生提问总结',studio:'录入数字人',modelComplete:'建模完成',preview:'视频预览',scripts:'选择话术',shareLinks:'邀请链接',knowledge:'知识库问答'};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let toastTimer;
 let afterSheetClose=null;
