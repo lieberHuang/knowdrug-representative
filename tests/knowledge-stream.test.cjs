@@ -20,6 +20,13 @@ function events(raw){return raw.split('\n\n').filter(Boolean).map(frame=>{const 
  const incomplete=async()=>streamed([chunk('未完成')],{complete:false});
  const badRequest=new Request('https://api.example/api/knowledge/stream',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','CF-Connecting-IP':'stream-c'},body:JSON.stringify({expert:'insurance',question:'申请材料？'})});
  const badFrames=events(await (await handleKnowledgeStream(badRequest,env,incomplete)).text());assert.equal(badFrames.at(-1).type,'error');assert.match(badFrames.at(-1).data.error,/中断/);assert(!badFrames.some(item=>item.type==='done'));
+ const blank=()=>new Response(JSON.stringify({choices:[{message:{content:'   '}}]}),{headers:{'Content-Type':'application/json'}});
+ let metadataCalls=0;const malformedMetadata=async(url,options)=>{metadataCalls++;return JSON.parse(options.body).stream?streamed([chunk('请核对申请材料。')]):blank();};
+ const metadataRequest=new Request('https://api.example/api/knowledge/stream',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','CF-Connecting-IP':'stream-d'},body:JSON.stringify({expert:'insurance',question:'申请材料如何核对？'})});
+ const metadataFrames=events(await (await handleKnowledgeStream(metadataRequest,env,malformedMetadata)).text());assert.equal(metadataFrames.at(-1).type,'done');assert.equal(metadataFrames.at(-1).data.answer.body,'请核对申请材料。');assert.equal(metadataFrames.at(-1).data.followUps.length,3);assert(!metadataFrames.some(item=>item.type==='error'));assert.equal(metadataCalls,3);
+ let classifyCalls=0;const malformedScope=async(url,options)=>{classifyCalls++;if(classifyCalls<=2)return blank();return JSON.parse(options.body).stream?streamed([chunk('日达仙以批准说明书为准。')]):reply({title:'说明书核对',followUps:['日达仙适用人群如何核对？','日达仙用药安全信息如何确认？','日达仙资料版本如何查阅？']});};
+ const scopeRequest=new Request('https://api.example/api/knowledge/stream',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json','CF-Connecting-IP':'stream-e'},body:JSON.stringify({expert:'drug',question:'日达仙说明书应重点核对哪些项目？'})});
+ const scopeFrames=events(await (await handleKnowledgeStream(scopeRequest,env,malformedScope)).text());assert.equal(scopeFrames.at(-1).type,'done');assert.equal(scopeFrames.at(-1).data.answer.title,'说明书核对');assert.equal(classifyCalls,4);
  const {createApiServer}=await import('../server/aliyun.mjs');
  const nodeModel=async(url,options)=>JSON.parse(options.body).stream?streamed([chunk('先核对条款，'),chunk('再整理材料。')]):reply({title:'材料核对',followUps:['材料来源如何核对？','申请条件如何确认？','缺少材料如何补充？']});
  const server=createApiServer({env:{...env,TRUST_PROXY:'1'},fetchImpl:nodeModel});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
