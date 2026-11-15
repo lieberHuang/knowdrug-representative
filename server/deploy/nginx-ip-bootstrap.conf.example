@@ -1,0 +1,13 @@
+# HTTP only while requesting an IP address certificate.
+server {
+    listen 80;
+    server_name PUBLIC_IP;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;
+    }
+
+    location / {
+        return 404;
+    }
+}

@@ -1,6 +1,6 @@
 # 阿里云 ECS 部署准备
 
-`server/aliyun.mjs` 使用 Node.js 内置 HTTP 服务运行现有 DeepSeek 接口，无运行时 npm 依赖。启动命令：`node server/aliyun.mjs`。
+`server/aliyun.mjs` 使用 Node.js 内置 HTTP 服务运行现有 DeepSeek 接口，无运行时 npm 依赖。服务使用 `/opt/knowdrug-api/node/bin/node`，避免依赖 Ubuntu 22.04 软件源中较旧的 Node.js 12。
 
 部署前需取得实例 ID、地域及 Workbench 凭证或 SSH 访问方式，并检查系统、Node.js 路径、可用端口、Nginx 和已有站点。本目录的 service、域名及证书路径均为待确认模板，不能直接覆盖服务器配置。
 
