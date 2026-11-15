@@ -85,3 +85,5 @@
 - “链接行为轨迹”单独保存每位医生的随机演示访问序列，包含浏览、播放、看完及提问，刷新不重新随机；实际轨迹仍单独记录，展示时合并排序，注销会清空。
 - 医院使用现实上海三甲医院名称，医生仍为已确认的非真实人员展示姓名，不表示这些人员在相应机构任职。医院资料依据：[中山医院（国家卫健委）](https://www.nhc.gov.cn/wjw/c100175/202110/b3e60ff5923b49efa070bef323687361.shtml)、[瑞金医院概况](https://rjvpn2.rjh.com.cn/2018RJPortal/main/yyjs/rjgk/index.shtml)、[华山医院介绍](https://www.huashan.org.cn/yygk/hsyyjs.htm)。
 - API 参考：[DeepSeek 调用文档](https://api-docs.deepseek.com/)、[JSON 输出](https://api-docs.deepseek.com/guides/json_mode/)。
+
+服务端的非 API 路由重定向到 GitHub Pages，以保留当前前端访问入口。当前测试机的网络代理会重置 chatgpt.site 主机名连接；真实联调通过指定可达边缘地址完成，默认代理配置仍需用户调整或更换后端域名。
