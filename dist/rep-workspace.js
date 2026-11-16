@@ -7,10 +7,10 @@ const RepWorkspace=(()=>{
  const options={kol:['待评估','全国级 KOL','区域级 KOL','院内骨干','临床医生'],stage:['待评估','初步了解','资料研读','临床关注','持续交流'],payment:['待了解','关注商保覆盖','关注理赔流程','关注患者自付','暂无明确偏好']};
  let scriptKey=RepVideoTemplates[0].id;
  const videoTemplate=record=>RepVideoTemplates.find(item=>item.id===record?.templateId);
- const videoSource=record=>record?.blob?objectURL(record.blob):videoTemplate(record)?.src||(record?.templateId==='welcome'?'https://101.132.38.176/media/20261116/intro.mp4':'');
- const videoFallback=record=>record?.blob?'':videoTemplate(record)?.fallbackSrc||(record?.templateId==='welcome'?'assets/welcome-intro-fast.mp4':'');
+ const videoSource=record=>record?.blob?objectURL(record.blob):videoTemplate(record)?.src||(record?.templateId==='welcome'?'https://101.132.38.176/media/20261116/intro-v3.mp4':'');
+ const videoFallback=record=>record?.blob?'':videoTemplate(record)?.fallbackSrc||(record?.templateId==='welcome'?'assets/welcome-intro-20261116.mp4':'');
  document.addEventListener('error',event=>{const media=event.target,fallback=media?.dataset?.fallbackSrc;if(media?.tagName==='VIDEO'&&fallback&&media.src!==new URL(fallback,location.href).href){media.src=fallback;media.load();}},true);
- const videoPoster=record=>record?.templateId==='welcome'?'assets/welcome-intro.jpg':videoTemplate(record)?.poster||record?.photo||profile?.photo||'';
+ const videoPoster=record=>record?.templateId==='welcome'?'assets/welcome-intro-20261116.jpg':videoTemplate(record)?.poster||record?.photo||profile?.photo||'';
  const fmt=at=>new Date(at).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
  const select=(name,values,value)=>`<select name="${name}" class="rw-input">${values.map(v=>`<option ${v===value?'selected':''}>${e(v)}</option>`).join('')}</select>`;
  const button=(action,text,secondary=false)=>`<button type="button" class="${secondary?'secondary-button':'primary-button'}" data-rw="${action}" ${busy||checking?'disabled':''}>${text}</button>`;
