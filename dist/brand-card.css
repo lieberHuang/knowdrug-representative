@@ -1,0 +1,51 @@
+/* Header wordmark and home portrait card, based on the supplied reference. */
+body[data-page="home"] .topbar{
+  background:#fff0dfd9;
+  border-bottom-color:transparent;
+  box-shadow:none;
+}
+.topbar .brand{gap:0;white-space:nowrap;color:#292828;font-size:22px;font-weight:800;letter-spacing:-.045em}
+.brand-wordmark{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;line-height:1}
+.brand-wordmark em{display:inline-block;font-style:normal;font-weight:900;letter-spacing:-.09em;transform:skew(-9deg);transform-origin:center bottom}
+.brand-wordmark strong{font-size:1.04em;font-weight:800;letter-spacing:-.065em}
+.topbar .profile-button{width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid #fff;box-shadow:0 3px 14px #8f522016}
+.topbar .profile-button img{width:39px;height:39px;border:0;border-radius:50%;background:#fff7f0}
+body[data-page="home"] .greeting{margin-top:6px;margin-bottom:18px}
+body[data-page="home"] .greeting h1{font-size:26px;line-height:1.38;font-weight:750;letter-spacing:-.035em}
+body[data-page="home"] .portrait-card{
+  min-height:162px;overflow:hidden;isolation:isolate;
+  border:1px solid #fff;border-radius:22px;
+  background:#fffdfb;box-shadow:0 6px 20px #a45b1f0b;
+}
+body[data-page="home"] .portrait-card .portrait{
+  position:absolute;inset:0 0 0 auto;width:148px;height:100%;min-height:0;
+  object-fit:cover;object-position:50% 22%;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 26%);
+}
+body[data-page="home"] .portrait-info{
+  position:relative;z-index:1;justify-content:center;
+  padding:22px 136px 22px 22px;
+}
+body[data-page="home"] .portrait-info>h2{color:#2b2929;font-size:23px;line-height:1.4;font-weight:750;white-space:nowrap}
+body[data-page="home"] .portrait-info .text-btn{
+  margin-top:14px;min-height:44px;padding:4px 0;
+  color:#f36a0a;font-size:15px;font-weight:550;white-space:nowrap;
+}
+body[data-page="home"] .portrait-info .text-btn span{font-size:21px;line-height:1}
+body[data-page="home"] .portrait-card .round-play{
+  z-index:2;left:auto;right:13px;top:auto;bottom:12px;
+  width:40px;height:40px;border:1px solid #fff;
+  background:#fff9f1e8;color:#ff6b00;
+  box-shadow:0 3px 12px #7f4c2b26;
+}
+body[data-page="home"] .portrait-card .round-play svg{fill:#ff6b00}
+@media(max-width:360px){
+  .topbar .brand{font-size:19px}.brand-wordmark{gap:4px}
+  body[data-page="home"] .greeting h1{font-size:23px}
+  body[data-page="home"] .portrait-card{min-height:150px}
+  body[data-page="home"] .portrait-card .portrait{width:119px}
+  body[data-page="home"] .portrait-info{padding:19px 104px 19px 18px}
+  body[data-page="home"] .portrait-info>h2{font-size:20px}
+  body[data-page="home"] .portrait-info .text-btn{font-size:14px;margin-top:9px}
+}
