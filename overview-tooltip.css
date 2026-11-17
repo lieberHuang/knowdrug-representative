@@ -1,0 +1,25 @@
+/* Project overview: show each bar's date and value without changing the cards. */
+.overview-chart-bars i{position:relative;cursor:help}
+.overview-chart-bars i::after{
+  content:attr(data-tooltip);position:absolute;z-index:3;
+  left:50%;bottom:calc(100% + 7px);
+  padding:5px 8px;border:1px solid #ffd1b1;border-radius:8px;
+  background:#fff8f1f2;color:#b7470b;
+  box-shadow:0 6px 18px #6636192e;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  font-size:11px;font-style:normal;font-weight:700;line-height:1.35;
+  white-space:nowrap;pointer-events:none;
+  opacity:0;visibility:hidden;transform:translate(-50%,4px);
+  transition:opacity .15s ease,transform .15s ease,visibility .15s;
+}
+.overview-chart-bars i:first-child::after{left:-4px;transform:translateY(4px)}
+.overview-chart-bars i:last-child::after{left:auto;right:-4px;transform:translateY(4px)}
+.overview-chart-bars i.is-active::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.overview-chart-bars i.is-active:first-child::after,
+.overview-chart-bars i.is-active:last-child::after{transform:translateY(0)}
+@media(hover:hover){
+  .overview-chart-bars i:hover::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  .overview-chart-bars i:first-child:hover::after,
+  .overview-chart-bars i:last-child:hover::after{transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){.overview-chart-bars i::after{transition:none}}
